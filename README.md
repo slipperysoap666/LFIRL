@@ -76,9 +76,6 @@ The dataset loader materializes expert demonstrations into `expert_data/` as `.n
 
 Generated files under `expert_data/`, `pretrained_policy/`, and `results/` are runtime artifacts and do not need to be committed unless you intentionally want to share checkpoints or cached data.
 
-## Reproducibility
-
-The main random seed is set in each YAML config under `policy.seed`. The environment file pins the Python and package versions from the development environment. For the most reproducible setup, keep the same operating system, CUDA driver compatibility, MuJoCo backend, and config file.
 
 ## Quick Start
 
