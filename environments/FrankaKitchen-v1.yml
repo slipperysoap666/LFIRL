@@ -1,0 +1,167 @@
+env_id: "FrankaKitchen-v1"
+
+kitchen:
+  minari_dataset_id: "D4RL/kitchen/complete-v2"
+  tasks_to_complete:
+    - "kettle"
+    - "light switch"
+    - "microwave"
+    - "slide cabinet"
+  eval_metric: "final_timestep_reward"
+
+policy:
+  batch_size: 256
+  lr: 1.0e-4
+  epochs: 200
+  eval_interval: 20
+  timesteps: 100
+  ddim_steps: 20
+  diffusion_model: "ddpm"
+  obs_horizon: 2
+  pred_horizon: 16
+  action_horizon: 8
+  num_expert: 19
+  seed: 42
+  eval_episodes: 10
+  num_workers: 0
+  pin_memory: false
+
+q_net:
+  use_state_bias: false
+  state_embed_dim: 256
+  hidden: 256
+  layers: 3
+  act: silu
+  layernorm: false
+  lr: 3.0e-5
+  weight_decay: 0.0
+  obs_encoder:
+    out_dim: 256
+    per_key_hidden: 256
+    per_key_layers: 2
+    agg: sum
+    concat_proj_dim: 256
+    act: silu
+    layernorm: false
+    use_goal_delta: true
+  loss:
+    beta_scale: 1.0
+    use_huber: false
+    huber_delta: 1.0
+    clip_grad_norm: 1.0
+    q_l2_reg: 1.0e-4
+    dp_t_eval: 0
+    rank_weight: 1.0
+    rank_margin: 1.0
+    rank_samples: 8
+
+b_net:
+  state_embed_dim: 256
+  hidden: 256
+  layers: 3
+  act: silu
+  layernorm: false
+  lr: 3.0e-5
+  weight_decay: 0.0
+  obs_encoder:
+    out_dim: 256
+    per_key_hidden: 256
+    per_key_layers: 2
+    agg: sum
+    concat_proj_dim: 256
+    act: silu
+    layernorm: false
+    use_goal_delta: true
+  loss:
+    fit_reward: false
+    num_next_action_samples: 16
+    backup_type: max
+    lse_beta: 1.0
+    use_huber: true
+    huber_delta: 1.0
+    clip_grad_norm: 1.0
+    terminal_anchor_weight: 1.0
+    terminal_action_samples: 16
+
+v_net:
+  state_embed_dim: 256
+  hidden: 256
+  layers: 3
+  act: silu
+  layernorm: false
+  lr: 3.0e-5
+  weight_decay: 0.0
+  obs_encoder:
+    out_dim: 256
+    per_key_hidden: 256
+    per_key_layers: 2
+    agg: sum
+    concat_proj_dim: 256
+    act: silu
+    layernorm: false
+    use_goal_delta: true
+  loss:
+    type: gumbel
+    beta: 2.0
+    expectile: 0.8
+    max_clip: 10.0
+    sample_random_times: 4
+    noise: true
+    noise_std: 0.1
+    noise_clip: 0.5
+    action_low: -1.0
+    action_high: 1.0
+    log_loss: true
+    clip_max: 7.0
+
+r_net:
+  include_action: true
+  state_embed_dim: 256
+  hidden: 256
+  layers: 3
+  act: silu
+  layernorm: false
+  lr: 3.0e-5
+  weight_decay: 0.0
+  obs_encoder:
+    out_dim: 256
+    per_key_hidden: 256
+    per_key_layers: 2
+    agg: sum
+    concat_proj_dim: 256
+    act: silu
+    layernorm: false
+    use_goal_delta: true
+  loss:
+    target_clip: 1.0e6
+    huber_delta: 1.0
+    clip_grad_norm: 1.0
+    use_huber: true
+    standardize_target: true
+
+irl:
+  seed: 42
+  gamma: 0.99
+  batch_size: 256
+  ema_tau: 0.005
+  enable_b_training_for_flow_matching: true
+  qhat_passes: 40
+  b_passes: 40
+  v_passes: 100
+  r_passes: 100
+  dp_norm_mode: gaussian
+  dp_norm_max_samples: 200000
+
+online:
+  enabled: false
+  algorithm: "ppo"
+  num_trajectories: null
+  deterministic: false
+  policy: auto
+  device: auto
+  seed_offset: 100000
+
+paths:
+  pretrained_dir: "pretrained_policy"
+  expert_dir: "expert_data"
+  results_dir: "results"
